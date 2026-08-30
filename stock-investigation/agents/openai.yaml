@@ -1,0 +1,4 @@
+interface:
+  display_name: "Stock Investigation"
+  short_description: "Investigate a stock move and build an interactive sourced dashboard"
+  default_prompt: "Use $stock-investigation to investigate this ticker and date, then generate the interactive HTML report."
