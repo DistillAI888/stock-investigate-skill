@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Collect deterministic market evidence for one stock-move investigation."""
+"""Collect deterministic evidence for one US-stock move investigation."""
 
 from __future__ import annotations
 
@@ -13,6 +13,13 @@ import pandas as pd
 import yfinance as yf
 
 
+MACRO_LABELS = {
+    "^VIX": "VIX volatility index",
+    "TLT": "Long-duration US Treasury ETF",
+    "UUP": "US dollar index ETF",
+}
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ticker", required=True, help="US-listed ticker symbol")
@@ -20,6 +27,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--benchmark", default="QQQ")
     parser.add_argument("--sector", default="SOXX")
     parser.add_argument("--peers", default="", help="Comma-separated peer symbols")
+    parser.add_argument(
+        "--macro-proxies",
+        default="^VIX,TLT,UUP",
+        help="Comma-separated market-observable macro proxies",
+    )
     parser.add_argument("--output", required=True, type=Path)
     return parser.parse_args()
 
@@ -28,6 +40,12 @@ def number(value: Any, digits: int = 2) -> float | None:
     if value is None or pd.isna(value):
         return None
     return round(float(value), digits)
+
+
+def integer(value: Any) -> int | None:
+    if value is None or pd.isna(value):
+        return None
+    return int(value)
 
 
 def unique_symbols(items: list[str]) -> list[str]:
@@ -40,7 +58,7 @@ def unique_symbols(items: list[str]) -> list[str]:
 
 
 def symbol_frame(downloaded: pd.DataFrame, symbol: str, symbol_count: int) -> pd.DataFrame:
-    if symbol_count == 1:
+    if symbol_count == 1 and not isinstance(downloaded.columns, pd.MultiIndex):
         frame = downloaded.copy()
     else:
         try:
@@ -76,22 +94,100 @@ def session_metrics(frame: pd.DataFrame, target: pd.Timestamp) -> dict[str, Any]
         "high": number(row["High"]),
         "low": number(row["Low"]),
         "close": number(row["Close"]),
-        "volume": int(row["Volume"]),
+        "volume": integer(row["Volume"]),
         "return_1d": number((float(row["Close"]) / float(previous["Close"]) - 1) * 100),
         "return_5d": number((float(row["Close"]) / float(five_back["Close"]) - 1) * 100),
         "gap": number((float(row["Open"]) / float(previous["Close"]) - 1) * 100),
-        "average_volume_20": int(mean_volume) if mean_volume else None,
+        "average_volume_20": integer(mean_volume),
         "rvol20": number(float(row["Volume"]) / mean_volume) if mean_volume else None,
     }
 
 
+def indicator_series(frame: pd.DataFrame, focus_date: str) -> pd.DataFrame:
+    data = frame.loc[frame.index <= pd.Timestamp(focus_date)].copy()
+    close = data["Close"].astype(float)
+    high = data["High"].astype(float)
+    low = data["Low"].astype(float)
+    volume = data["Volume"].astype(float)
+
+    data["SMA20"] = close.rolling(20).mean()
+    data["SMA50"] = close.rolling(50).mean()
+    data["SMA200"] = close.rolling(200).mean()
+    data["EMA12"] = close.ewm(span=12, adjust=False).mean()
+    data["EMA26"] = close.ewm(span=26, adjust=False).mean()
+    data["MACD"] = data["EMA12"] - data["EMA26"]
+    data["MACDSignal"] = data["MACD"].ewm(span=9, adjust=False).mean()
+
+    delta = close.diff()
+    gain = delta.clip(lower=0).ewm(alpha=1 / 14, adjust=False, min_periods=14).mean()
+    loss = (-delta.clip(upper=0)).ewm(alpha=1 / 14, adjust=False, min_periods=14).mean()
+    rs = gain / loss.replace(0, float("nan"))
+    data["RSI14"] = 100 - (100 / (1 + rs))
+    data.loc[(loss == 0) & gain.notna(), "RSI14"] = 100
+
+    previous_close = close.shift(1)
+    true_range = pd.concat(
+        [(high - low), (high - previous_close).abs(), (low - previous_close).abs()], axis=1
+    ).max(axis=1)
+    data["ATR14"] = true_range.rolling(14).mean()
+    data["BBUpper"] = data["SMA20"] + 2 * close.rolling(20).std()
+    data["BBLower"] = data["SMA20"] - 2 * close.rolling(20).std()
+    data["RVOL20"] = volume / volume.shift(1).rolling(20).mean()
+    data["VolumeMA5"] = volume.rolling(5).mean()
+    data["VolumeMA20"] = volume.rolling(20).mean()
+    direction = close.diff().apply(lambda value: 1 if value > 0 else -1 if value < 0 else 0)
+    data["OBV"] = (direction * volume).cumsum()
+    return data
+
+
+def percent_distance(current: float, reference: Any) -> float | None:
+    if reference is None or pd.isna(reference) or float(reference) == 0:
+        return None
+    return number((current / float(reference) - 1) * 100)
+
+
+def technical_snapshot(frame: pd.DataFrame, focus_date: str) -> dict[str, Any]:
+    data = indicator_series(frame, focus_date)
+    row = data.iloc[-1]
+    close = float(row["Close"])
+    trailing_20 = data.tail(20)
+    trailing_252 = data.tail(252)
+    obv_change_20 = None
+    if len(data) > 20:
+        obv_change_20 = number(float(data["OBV"].iloc[-1] - data["OBV"].iloc[-21]), 0)
+
+    return {
+        "as_of": data.index[-1].date().isoformat(),
+        "sma20": number(row["SMA20"]),
+        "sma50": number(row["SMA50"]),
+        "sma200": number(row["SMA200"]),
+        "distance_from_sma20_pct": percent_distance(close, row["SMA20"]),
+        "distance_from_sma50_pct": percent_distance(close, row["SMA50"]),
+        "distance_from_sma200_pct": percent_distance(close, row["SMA200"]),
+        "rsi14": number(row["RSI14"]),
+        "macd": number(row["MACD"], 4),
+        "macd_signal": number(row["MACDSignal"], 4),
+        "macd_histogram": number(row["MACD"] - row["MACDSignal"], 4),
+        "atr14": number(row["ATR14"]),
+        "atr14_pct": number(float(row["ATR14"]) / close * 100) if not pd.isna(row["ATR14"]) else None,
+        "bollinger_upper": number(row["BBUpper"]),
+        "bollinger_lower": number(row["BBLower"]),
+        "high_20d": number(trailing_20["High"].max()),
+        "low_20d": number(trailing_20["Low"].min()),
+        "high_52w": number(trailing_252["High"].max()),
+        "low_52w": number(trailing_252["Low"].min()),
+        "volume_ma5_vs_ma20": number(row["VolumeMA5"] / row["VolumeMA20"])
+        if not pd.isna(row["VolumeMA20"]) and float(row["VolumeMA20"]) != 0
+        else None,
+        "obv_change_20": obv_change_20,
+        "obv_trend_20": "rising" if obv_change_20 and obv_change_20 > 0 else "falling" if obv_change_20 and obv_change_20 < 0 else "flat_or_unavailable",
+        "limitations": "Technical indicators describe price and volume; they do not establish the cause of a move.",
+    }
+
+
 def chart_rows(frame: pd.DataFrame, focus_date: str) -> list[dict[str, Any]]:
-    focus = pd.Timestamp(focus_date)
-    visible = frame.loc[frame.index <= focus].tail(260).copy()
-    close = visible["Close"].astype(float)
-    returns = close.pct_change() * 100
-    volume = visible["Volume"].astype(float)
-    rvol = volume / volume.shift(1).rolling(20).mean()
+    visible = indicator_series(frame, focus_date).tail(260)
+    returns = visible["Close"].astype(float).pct_change() * 100
     rows: list[dict[str, Any]] = []
     for idx, row in visible.iterrows():
         rows.append(
@@ -101,9 +197,11 @@ def chart_rows(frame: pd.DataFrame, focus_date: str) -> list[dict[str, Any]]:
                 "high": number(row["High"]),
                 "low": number(row["Low"]),
                 "close": number(row["Close"]),
-                "volume": int(row["Volume"]),
+                "volume": integer(row["Volume"]),
                 "return": number(returns.loc[idx]),
-                "rvol": number(rvol.loc[idx]),
+                "rvol": number(row["RVOL20"]),
+                "sma20": number(row["SMA20"]),
+                "sma50": number(row["SMA50"]),
             }
         )
     return rows
@@ -111,7 +209,6 @@ def chart_rows(frame: pd.DataFrame, focus_date: str) -> list[dict[str, Any]]:
 
 def serialize_news(ticker: yf.Ticker, symbol: str) -> tuple[list[dict[str, Any]], list[str]]:
     output: list[dict[str, Any]] = []
-    warnings: list[str] = []
     try:
         raw_news = ticker.get_news(count=30, tab="all")
     except Exception as exc:  # yfinance upstream failures vary
@@ -139,8 +236,7 @@ def serialize_news(ticker: yf.Ticker, symbol: str) -> tuple[list[dict[str, Any]]
                 else content.get("link"),
             }
         )
-    if not output:
-        warnings.append("Yahoo news returned no ticker-specific items; perform an independent source search.")
+    warnings = [] if output else ["Yahoo news returned no ticker-specific items; perform an independent source search."]
     return output[:20], warnings
 
 
@@ -162,6 +258,87 @@ def serialize_filings(ticker: yf.Ticker) -> tuple[list[dict[str, Any]], list[str
             }
         )
     return output, []
+
+
+def iso_date_from_epoch(value: Any) -> str | None:
+    try:
+        return datetime.fromtimestamp(float(value), tz=timezone.utc).date().isoformat()
+    except (TypeError, ValueError, OSError):
+        return None
+
+
+def positioning_snapshot(ticker: yf.Ticker, focus_date: str) -> tuple[dict[str, Any], list[str]]:
+    try:
+        info = ticker.get_info() or {}
+    except Exception as exc:
+        return {}, [f"Current positioning snapshot unavailable: {exc}"]
+
+    current_date = datetime.now(timezone.utc).date()
+    historical = abs((current_date - date.fromisoformat(focus_date)).days) > 7
+    snapshot = {
+        "as_of": datetime.now(timezone.utc).isoformat(),
+        "is_contemporaneous_with_investigation": not historical,
+        "short_interest_date": iso_date_from_epoch(info.get("dateShortInterest")),
+        "short_percent_of_float": number(info.get("shortPercentOfFloat") * 100)
+        if info.get("shortPercentOfFloat") is not None
+        else None,
+        "short_ratio_days": number(info.get("shortRatio")),
+        "shares_short": integer(info.get("sharesShort")),
+        "shares_short_prior_month": integer(info.get("sharesShortPriorMonth")),
+        "institution_held_percent": number(info.get("heldPercentInstitutions") * 100)
+        if info.get("heldPercentInstitutions") is not None
+        else None,
+        "insider_held_percent": number(info.get("heldPercentInsiders") * 100)
+        if info.get("heldPercentInsiders") is not None
+        else None,
+        "analyst_target_mean": number(info.get("targetMeanPrice")),
+        "analyst_target_low": number(info.get("targetLowPrice")),
+        "analyst_target_high": number(info.get("targetHighPrice")),
+        "recommendation_key": info.get("recommendationKey"),
+        "source_name": "Yahoo Finance company snapshot",
+        "source_url": info.get("website"),
+    }
+    warnings = []
+    if historical:
+        warnings.append(
+            "Short-interest, ownership, and analyst fields are current snapshots, not historical evidence for the investigation date."
+        )
+    return snapshot, warnings
+
+
+def options_snapshot(ticker: yf.Ticker, focus_date: str) -> tuple[dict[str, Any], list[str]]:
+    try:
+        expirations = ticker.options or ()
+        if not expirations:
+            return {}, ["No current listed-options chain was returned."]
+        expiration = expirations[0]
+        chain = ticker.option_chain(expiration)
+        call_oi = int(chain.calls.get("openInterest", pd.Series(dtype=float)).fillna(0).sum())
+        put_oi = int(chain.puts.get("openInterest", pd.Series(dtype=float)).fillna(0).sum())
+        call_volume = int(chain.calls.get("volume", pd.Series(dtype=float)).fillna(0).sum())
+        put_volume = int(chain.puts.get("volume", pd.Series(dtype=float)).fillna(0).sum())
+    except Exception as exc:
+        return {}, [f"Current options snapshot unavailable: {exc}"]
+
+    historical = abs((datetime.now(timezone.utc).date() - date.fromisoformat(focus_date)).days) > 7
+    snapshot = {
+        "as_of": datetime.now(timezone.utc).isoformat(),
+        "expiration": expiration,
+        "is_contemporaneous_with_investigation": not historical,
+        "call_open_interest": call_oi,
+        "put_open_interest": put_oi,
+        "put_call_open_interest_ratio": number(put_oi / call_oi) if call_oi else None,
+        "call_volume": call_volume,
+        "put_volume": put_volume,
+        "put_call_volume_ratio": number(put_volume / call_volume) if call_volume else None,
+        "source_name": "Yahoo Finance current options chain",
+    }
+    warnings = []
+    if historical:
+        warnings.append(
+            "The options chain is a current snapshot and must not be used to explain a historical price move."
+        )
+    return snapshot, warnings
 
 
 def choose_focus(frame: pd.DataFrame, requested: str | None) -> tuple[str, str]:
@@ -186,8 +363,12 @@ def choose_focus(frame: pd.DataFrame, requested: str | None) -> tuple[str, str]:
 def main() -> None:
     args = parse_args()
     ticker_symbol = args.ticker.upper()
+    benchmark = args.benchmark.upper()
+    sector = args.sector.upper()
     peers = unique_symbols(args.peers.split(","))
-    symbols = unique_symbols([ticker_symbol, args.benchmark, args.sector, *peers])
+    macro_symbols = unique_symbols(args.macro_proxies.split(","))
+    comparison_symbols = unique_symbols([ticker_symbol, benchmark, sector, *peers])
+    symbols = unique_symbols([*comparison_symbols, *macro_symbols])
 
     if args.date:
         requested_date = date.fromisoformat(args.date)
@@ -210,33 +391,75 @@ def main() -> None:
             group_by="ticker",
         )
 
-    frames = {symbol: symbol_frame(downloaded, symbol, len(symbols)) for symbol in symbols}
+    warnings: list[str] = []
+    frames: dict[str, pd.DataFrame] = {}
+    for symbol in symbols:
+        try:
+            frames[symbol] = symbol_frame(downloaded, symbol, len(symbols))
+        except RuntimeError as exc:
+            warnings.append(str(exc))
+    if ticker_symbol not in frames:
+        raise RuntimeError(f"No market data returned for required ticker {ticker_symbol}")
+
     focus_date, selection_note = choose_focus(frames[ticker_symbol], args.date)
     target = pd.Timestamp(focus_date)
-    metrics = {symbol: session_metrics(frame, target) for symbol, frame in frames.items()}
-    benchmark_return = metrics[args.benchmark.upper()]["return_1d"]
+    metrics: dict[str, dict[str, Any]] = {}
+    for symbol, frame in frames.items():
+        try:
+            metrics[symbol] = session_metrics(frame, target)
+        except RuntimeError as exc:
+            warnings.append(f"{symbol}: {exc}")
+
+    benchmark_return = (metrics.get(benchmark) or {}).get("return_1d")
     comparisons: list[dict[str, Any]] = []
-    for symbol in symbols:
-        item = metrics[symbol]
+    for symbol in comparison_symbols:
+        item = metrics.get(symbol)
+        if not item:
+            continue
         comparisons.append(
             {
                 "symbol": symbol,
-                "role": "stock" if symbol == ticker_symbol else "benchmark" if symbol == args.benchmark.upper() else "sector" if symbol == args.sector.upper() else "peer",
+                "role": "stock" if symbol == ticker_symbol else "benchmark" if symbol == benchmark else "sector" if symbol == sector else "peer",
                 "date": item["date"],
                 "return_1d": item["return_1d"],
-                "relative_to_benchmark": number(item["return_1d"] - benchmark_return),
+                "relative_to_benchmark": number(item["return_1d"] - benchmark_return)
+                if benchmark_return is not None
+                else None,
+            }
+        )
+
+    macro_proxies: list[dict[str, Any]] = []
+    for symbol in macro_symbols:
+        item = metrics.get(symbol)
+        if not item:
+            continue
+        macro_proxies.append(
+            {
+                "symbol": symbol,
+                "label": MACRO_LABELS.get(symbol, symbol),
+                "date": item["date"],
+                "close": item["close"],
+                "return_1d": item["return_1d"],
+                "return_5d": item["return_5d"],
+                "source_url": f"https://finance.yahoo.com/quote/{symbol}",
             }
         )
 
     ticker = yf.Ticker(ticker_symbol)
     news, news_warnings = serialize_news(ticker, ticker_symbol)
     filings, filing_warnings = serialize_filings(ticker)
-    warnings = [
-        "Yahoo Finance / yfinance is an unofficial research source; verify material claims against primary sources.",
-        "News near a price move is context, not proof of causation.",
-        *news_warnings,
-        *filing_warnings,
-    ]
+    positioning, positioning_warnings = positioning_snapshot(ticker, focus_date)
+    options, options_warnings = options_snapshot(ticker, focus_date)
+    warnings.extend(
+        [
+            "Yahoo Finance / yfinance is an unofficial research source; verify material claims against primary sources.",
+            "News near a price move is context, not proof of causation.",
+            *news_warnings,
+            *filing_warnings,
+            *positioning_warnings,
+            *options_warnings,
+        ]
+    )
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -244,11 +467,16 @@ def main() -> None:
         "requested_date": args.date,
         "investigation_date": focus_date,
         "date_selection_note": selection_note,
-        "benchmark": args.benchmark.upper(),
-        "sector": args.sector.upper(),
+        "benchmark": benchmark,
+        "sector": sector,
         "peers": peers,
+        "macro_symbols": macro_symbols,
         "focus": metrics[ticker_symbol],
         "comparisons": comparisons,
+        "macro_proxies": macro_proxies,
+        "technical": technical_snapshot(frames[ticker_symbol], focus_date),
+        "positioning_snapshot": positioning,
+        "options_snapshot": options,
         "chart": chart_rows(frames[ticker_symbol], focus_date),
         "news_candidates": news,
         "filing_candidates": filings,
