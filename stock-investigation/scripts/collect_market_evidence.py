@@ -181,7 +181,7 @@ def technical_snapshot(frame: pd.DataFrame, focus_date: str) -> dict[str, Any]:
         else None,
         "obv_change_20": obv_change_20,
         "obv_trend_20": "rising" if obv_change_20 and obv_change_20 > 0 else "falling" if obv_change_20 and obv_change_20 < 0 else "flat_or_unavailable",
-        "limitations": "Technical indicators describe price and volume; they do not establish the cause of a move.",
+        "limitations": "技术指标描述价格与成交量结构，不能单独证明异动原因。",
     }
 
 
@@ -301,7 +301,7 @@ def positioning_snapshot(ticker: yf.Ticker, focus_date: str) -> tuple[dict[str, 
     warnings = []
     if historical:
         warnings.append(
-            "Short-interest, ownership, and analyst fields are current snapshots, not historical evidence for the investigation date."
+            "空头、持股和分析师数据属于当前快照，不能作为调查日期的历史证据。"
         )
     return snapshot, warnings
 
@@ -310,7 +310,7 @@ def options_snapshot(ticker: yf.Ticker, focus_date: str) -> tuple[dict[str, Any]
     try:
         expirations = ticker.options or ()
         if not expirations:
-            return {}, ["No current listed-options chain was returned."]
+            return {}, ["未取得当前上市期权链数据。"]
         expiration = expirations[0]
         chain = ticker.option_chain(expiration)
         call_oi = int(chain.calls.get("openInterest", pd.Series(dtype=float)).fillna(0).sum())
@@ -331,12 +331,12 @@ def options_snapshot(ticker: yf.Ticker, focus_date: str) -> tuple[dict[str, Any]
         "call_volume": call_volume,
         "put_volume": put_volume,
         "put_call_volume_ratio": number(put_volume / call_volume) if call_volume else None,
-        "source_name": "Yahoo Finance current options chain",
+        "source_name": "Yahoo Finance 当前期权链",
     }
     warnings = []
     if historical:
         warnings.append(
-            "The options chain is a current snapshot and must not be used to explain a historical price move."
+            "期权链属于当前快照，不能用于解释历史股价异动。"
         )
     return snapshot, warnings
 
