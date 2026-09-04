@@ -2,21 +2,23 @@
 
 Create `analysis.json` as valid UTF-8 JSON. Use `null` or an empty array for unavailable fields; never invent values to satisfy the schema. Keep numeric display strings explicit about units and accounting basis.
 
+Use Simplified Chinese (`zh-CN`) for all reader-facing narrative fields by default. Use another language only when the user explicitly requests it.
+
 ## Required shape
 
 ```json
 {
   "company_name": "Sandisk Corporation",
-  "headline": "Why did the stock move in and after the session?",
-  "deck": "One-sentence scope and time-boundary description.",
+  "headline": "这只股票为何在盘中及盘后异动？",
+  "deck": "用一句话说明调查范围和时间边界。",
   "language": "zh-CN",
   "macro_context": [
     {
       "status": "confirmed",
       "occurred_at": "2026-08-05T10:00:00-04:00",
-      "title": "Relevant macro or policy event",
-      "detail": "What changed and whether timing overlaps the move.",
-      "source_name": "Primary publisher",
+      "title": "相关宏观或政策事件",
+      "detail": "说明发生了什么变化，以及时间是否与异动重合。",
+      "source_name": "一手发布机构",
       "source_url": "https://..."
     }
   ],
@@ -38,30 +40,30 @@ Create `analysis.json` as valid UTF-8 JSON. Use `null` or an empty array for una
   "guidance": [
     {
       "period": "FY27 Q1",
-      "metric": "Revenue",
+      "metric": "营收",
       "company_range": "$10.3B–$10.8B",
       "midpoint": "$10.55B",
       "consensus": "$10.82B",
       "midpoint_vs_consensus": "-2.5%",
-      "basis": "company guidance versus FactSet consensus",
+      "basis": "公司指引与 FactSet 市场共识对比",
       "source_url": "https://..."
     }
   ],
   "business_segments": [
     {
-      "name": "Data center",
+      "name": "数据中心",
       "actual": "$2.98B",
       "estimate": "$2.74B",
-      "change": "+8.8% versus consensus",
-      "why_it_matters": "Material driver discussed by management.",
+      "change": "较市场共识高 8.8%",
+      "why_it_matters": "管理层讨论的关键驱动因素。",
       "source_url": "https://..."
     }
   ],
   "findings": [
     {
       "status": "confirmed",
-      "title": "Short causal conclusion",
-      "detail": "What the evidence establishes and the applicable session.",
+      "title": "简短的因果结论",
+      "detail": "说明证据可以确认什么，以及适用的交易时段。",
       "source_urls": ["https://..."]
     }
   ],
@@ -71,10 +73,10 @@ Create `analysis.json` as valid UTF-8 JSON. Use `null` or an empty array for una
       "occurred_at": "2026-08-05T16:05:00-04:00",
       "session": "after-hours",
       "type": "earnings",
-      "title": "Company released earnings",
-      "summary": "What changed and why it matters.",
+      "title": "公司发布财报",
+      "summary": "说明发生了什么变化及其重要性。",
       "evidence_level": "A",
-      "source_name": "Company IR",
+      "source_name": "公司投资者关系网站",
       "source_url": "https://..."
     }
   ],
@@ -82,8 +84,8 @@ Create `analysis.json` as valid UTF-8 JSON. Use `null` or an empty array for una
     {
       "status": "inference",
       "as_of": "2026-07-31",
-      "title": "Possible liquidity pressure",
-      "detail": "Evidence, timing, and limitation.",
+      "title": "可能存在流动性压力",
+      "detail": "说明证据、时间和局限性。",
       "source_url": "https://..."
     }
   ],
@@ -91,26 +93,26 @@ Create `analysis.json` as valid UTF-8 JSON. Use `null` or an empty array for una
     {
       "status": "inference",
       "as_of": "2026-08-05",
-      "metric": "Put/call open-interest ratio",
+      "metric": "看跌/看涨期权未平仓量比率",
       "value": "1.21",
-      "interpretation": "What it suggests and why it does not prove causation.",
-      "source_name": "Exchange or data publisher",
+      "interpretation": "说明该指标可能意味着什么，以及为何不能据此证明因果关系。",
+      "source_name": "交易所或数据发布方",
       "source_url": "https://..."
     }
   ],
   "technical_summary": {
-    "regime": "Above long-term trend with expanding volatility",
-    "summary": "Concise interpretation of deterministic price-volume evidence.",
+    "regime": "位于长期趋势上方，波动率正在扩大",
+    "summary": "对确定性量价证据的简明解读。",
     "observations": [
       {
-        "label": "Price and volume",
+        "label": "价格与成交量",
         "value": "-5.4% / 1.00x RVOL",
-        "interpretation": "Large price move without abnormal volume."
+        "interpretation": "价格波动较大，但成交量没有明显异常。"
       }
     ]
   },
-  "warnings": ["Any unavailable, stale, delayed, or lower-quality evidence."],
-  "summary_markdown": "A concise Markdown summary for report.md."
+  "warnings": ["列出任何缺失、过期、延迟或质量较低的证据。"],
+  "summary_markdown": "供 report.md 使用的简明 Markdown 摘要。"
 }
 ```
 

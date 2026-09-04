@@ -31,7 +31,7 @@ def main() -> None:
         ensure_ascii=False,
         separators=(",", ":"),
     ).replace("</", "<\\/")
-    title = analysis.get("headline") or f"{evidence.get('ticker', 'Stock')} investigation"
+    title = analysis.get("headline") or f"{evidence.get('ticker', '股票')} 异动调查"
     html = template.replace("__REPORT_TITLE__", str(title)).replace("__REPORT_DATA__", payload)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(html, encoding="utf-8")

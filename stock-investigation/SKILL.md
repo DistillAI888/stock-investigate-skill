@@ -11,6 +11,7 @@ Turn a ticker and investigation date into an evidence-first interactive HTML rep
 
 - Required: US-listed ticker.
 - Optional: investigation date (`YYYY-MM-DD`), benchmark, sector ETF, peers, output language, and a specific question.
+- Default to Simplified Chinese (`zh-CN`) for `analysis.json`, `report.md`, and the rendered HTML unless the user explicitly requests another language.
 - If the date is omitted, use the latest completed US session that triggered the user's anomaly screen. If no screen is available, select the largest recent absolute return weighted by RVOL and disclose that choice.
 - Choose peers from the company's actual business exposure. Do not reuse SNDK-specific peers for unrelated companies.
 
@@ -20,7 +21,7 @@ Turn a ticker and investigation date into an evidence-first interactive HTML rep
 2. Resolve paths relative to this Skill directory. Run `scripts/collect_market_evidence.py` to create deterministic price, volume, RVOL, technical, macro-proxy, market, sector, peer, Yahoo news, SEC-link, current short-interest, and current options evidence.
 3. Research all five layers in the methodology: macro and market, industry, company fundamentals and events, positioning and sentiment, and technical price-volume structure. Use primary sources first for company and policy events; use established reporting for market reaction and positioning context.
 4. Align every event with the US session: pre-market, regular session, after-hours, or non-trading day. An event published after the close cannot explain that day's regular-session move.
-5. Write `analysis.json` using [references/output-contract.md](references/output-contract.md). Record actual-versus-consensus earnings and guidance when available. Label causal findings `confirmed`, `inference`, or `unknown`.
+5. Write `analysis.json` using [references/output-contract.md](references/output-contract.md). Use Simplified Chinese by default, including narrative fields and `summary_markdown`, unless the user requests another language. Record actual-versus-consensus earnings and guidance when available. Label causal findings `confirmed`, `inference`, or `unknown`.
 6. Run `scripts/render_dashboard.py` with the evidence and analysis files. The output must be a static `index.html`; do not require React, Node, a backend, or a build step.
 7. Open the report and verify the investigation date, chart, timeframe controls, event links, actual-versus-consensus fundamentals, findings, macro context, peer comparison, positioning and sentiment, technical section, warnings, and source links.
 

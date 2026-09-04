@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-TW">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,7 +7,7 @@
   <script src="https://unpkg.com/lightweight-charts@5.2.1/dist/lightweight-charts.standalone.production.js"></script>
   <style>
     :root{--bg:#080b10;--panel:#0e131b;--panel2:#111823;--line:#222c39;--soft:#19212c;--text:#e8edf4;--muted:#8490a1;--muted2:#596577;--green:#3dd6a0;--red:#ff667b;--amber:#f5bb4e;--blue:#62a8ff;--violet:#a78bfa;--cyan:#4ed6e8}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 50% -25%,#182131 0,transparent 38%),var(--bg);color:var(--text);font-family:Inter,"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;font-size:13px}a{color:inherit;text-decoration:none}button{font:inherit}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.positive{color:var(--green)!important}.negative{color:var(--red)!important}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 50% -25%,#182131 0,transparent 38%),var(--bg);color:var(--text);font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;font-size:13px}a{color:inherit;text-decoration:none}button{font:inherit}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.positive{color:var(--green)!important}.negative{color:var(--red)!important}
     .topbar{position:sticky;top:0;z-index:10;display:grid;grid-template-columns:240px 1fr auto;align-items:center;height:48px;padding:0 22px;border-bottom:1px solid var(--line);background:rgba(9,12,17,.94);backdrop-filter:blur(12px)}.brand{font-size:11px;font-weight:760;letter-spacing:.1em}.brand i{display:inline-block;width:7px;height:7px;margin-right:9px;border-radius:50%;background:var(--green);box-shadow:0 0 13px rgba(61,214,160,.5)}nav{display:flex;height:100%;overflow:hidden}nav a{display:flex;align-items:center;padding:0 12px;border-left:1px solid var(--soft);color:var(--muted);font-size:9px;white-space:nowrap}nav a:last-child{border-right:1px solid var(--soft)}nav a:hover{color:var(--text);background:#121923}.asof{color:var(--muted2);font-size:9px;letter-spacing:.05em}
     main{width:min(1420px,calc(100% - 32px));margin:auto;padding:26px 0 34px}.hero{display:grid;grid-template-columns:1fr 220px;align-items:end;gap:28px;margin-bottom:18px}.eyebrow{margin-bottom:9px;color:var(--green);font-size:10px;letter-spacing:.12em}.hero h1{margin:0;font-size:clamp(27px,3vw,43px);font-weight:650;letter-spacing:-.035em}.hero p{max-width:900px;margin:11px 0 0;color:var(--muted);line-height:1.7}.date-card{display:grid;gap:5px;padding:13px 15px;border:1px solid #334155;background:rgba(17,24,35,.8)}.date-card span{color:var(--muted);font-size:9px}.date-card strong{font-size:18px}.date-card small{color:var(--muted2);font-size:9px}
     .snapshots{display:grid;grid-template-columns:repeat(6,1fr);margin-bottom:9px;border:1px solid var(--line);background:var(--panel)}.snapshots article{display:flex;min-height:80px;flex-direction:column;justify-content:center;gap:6px;padding:12px 15px}.snapshots article+article{border-left:1px solid var(--line)}.snapshots span{color:var(--muted);font-size:9px;letter-spacing:.08em}.snapshots strong{font-size:19px}.snapshots small{color:var(--muted2);font-size:9px}
@@ -28,29 +28,29 @@
   </style>
 </head>
 <body>
-  <header class="topbar"><div class="brand mono"><i></i>CODEX MARKET DESK</div><nav><a href="#chart-section">價量圖</a><a href="#fundamentals">基本面</a><a href="#findings">結論</a><a href="#macro">總經</a><a href="#peers">同業</a><a href="#positioning">籌碼情緒</a><a href="#technical">技術面</a></nav><span class="asof mono" id="generated"></span></header>
+  <header class="topbar"><div class="brand mono"><i></i>CODEX MARKET DESK</div><nav><a href="#chart-section">价量图</a><a href="#fundamentals">基本面</a><a href="#findings">结论</a><a href="#macro">宏观</a><a href="#peers">同业</a><a href="#positioning">筹码情绪</a><a href="#technical">技术面</a></nav><span class="asof mono" id="generated"></span></header>
   <main>
-    <section class="hero"><div><div class="eyebrow mono" id="eyebrow"></div><h1 id="headline"></h1><p id="deck"></p></div><div class="date-card"><span>調查日期</span><strong class="mono" id="investigation-date"></strong><small>最新完成的美股交易時段</small></div></section>
+    <section class="hero"><div><div class="eyebrow mono" id="eyebrow"></div><h1 id="headline"></h1><p id="deck"></p></div><div class="date-card"><span>调查日期</span><strong class="mono" id="investigation-date"></strong><small>最新完成的美股交易时段</small></div></section>
     <section class="snapshots" id="snapshots"></section>
-    <section class="panel" id="chart-section"><div class="panel-head"><div><span class="number mono">01</span><div><h2>互動式價量圖</h2><p>事件、價格、成交量與均線放在同一條時間線</p></div></div><div class="legend"><span><i class="earning"></i>財報</span><span><i class="event"></i>重大事件</span><span><i class="sma20"></i>SMA20</span><span><i class="sma50"></i>SMA50</span></div></div><div class="chart-tools"><div class="periods" id="periods"><button data-size="22">1M</button><button class="active" data-size="66">3M</button><button data-size="132">6M</button><button data-size="260">1Y</button></div><span class="mono">拖動平移 · 滾輪縮放 · 游標查看事件</span></div><div class="readout mono" id="readout"></div><div id="chart"></div><div class="event-detail" id="event-detail"></div></section>
+    <section class="panel" id="chart-section"><div class="panel-head"><div><span class="number mono">01</span><div><h2>互动式价量图</h2><p>事件、价格、成交量与均线放在同一条时间线</p></div></div><div class="legend"><span><i class="earning"></i>财报</span><span><i class="event"></i>重大事件</span><span><i class="sma20"></i>SMA20</span><span><i class="sma50"></i>SMA50</span></div></div><div class="chart-tools"><div class="periods" id="periods"><button data-size="22">1M</button><button class="active" data-size="66">3M</button><button data-size="132">6M</button><button data-size="260">1Y</button></div><span class="mono">拖动平移 · 滚轮缩放 · 游标查看事件</span></div><div class="readout mono" id="readout"></div><div id="chart"></div><div class="event-detail" id="event-detail"></div></section>
 
-    <section class="block" id="fundamentals"><div class="section-title"><span class="number mono">02</span><div><h2>公司基本面與預期差</h2><p>實際值、共識、財測與重要業務指標</p></div></div><article class="panel" id="financial-panel"></article><div class="subhead"><h3>下一期財測</h3><span>公司指引與同口徑市場共識</span></div><div class="card-grid" id="guidance-grid"></div><div class="subhead"><h3>關鍵業務與營運指標</h3><span>只保留真正影響市場預期的項目</span></div><div class="card-grid" id="segment-grid"></div></section>
+    <section class="block" id="fundamentals"><div class="section-title"><span class="number mono">02</span><div><h2>公司基本面与预期差</h2><p>实际值、共识、业绩指引与重要业务指标</p></div></div><article class="panel" id="financial-panel"></article><div class="subhead"><h3>下一期业绩指引</h3><span>公司指引与同口径市场共识</span></div><div class="card-grid" id="guidance-grid"></div><div class="subhead"><h3>关键业务与运营指标</h3><span>只保留真正影响市场预期的项目</span></div><div class="card-grid" id="segment-grid"></div></section>
 
-    <section class="block" id="findings"><div class="section-title"><span class="number mono">03</span><div><h2>Codex 調查摘要</h2><p>已確認、合理推測與未找到分開呈現</p></div></div><div class="findings" id="finding-grid"></div></section>
+    <section class="block" id="findings"><div class="section-title"><span class="number mono">03</span><div><h2>Codex 调查摘要</h2><p>已确认、合理推测与未找到分开呈现</p></div></div><div class="findings" id="finding-grid"></div></section>
 
-    <section class="block" id="macro"><div class="section-title"><span class="number mono">04</span><div><h2>市場與總經背景</h2><p>大盤、波動率、利率敏感資產、美元與政策事件</p></div></div><div class="context-grid"><article class="panel proxy-grid" id="macro-proxies"></article><article class="panel context-list" id="macro-context"></article></div></section>
+    <section class="block" id="macro"><div class="section-title"><span class="number mono">04</span><div><h2>市场与宏观背景</h2><p>大盘、波动率、利率敏感资产、美元与政策事件</p></div></div><div class="context-grid"><article class="panel proxy-grid" id="macro-proxies"></article><article class="panel context-list" id="macro-context"></article></div></section>
 
-    <section class="block" id="peers"><div class="section-title"><span class="number mono">05</span><div><h2>產業與同業對照</h2><p id="peer-date"></p></div></div><article class="panel peer-panel"><div class="peer-list" id="peer-list"></div><aside class="peer-note"><span class="tag B mono">比較基準</span><h3>先確認它是不是跟著市場或產業一起動</h3><p>同業比較只提供橫截面證據。走勢一致不必然證明共同原因；走勢分歧也不必然證明公司單一事件。</p></aside></article></section>
+    <section class="block" id="peers"><div class="section-title"><span class="number mono">05</span><div><h2>产业与同业对照</h2><p id="peer-date"></p></div></div><article class="panel peer-panel"><div class="peer-list" id="peer-list"></div><aside class="peer-note"><span class="tag B mono">比较基准</span><h3>先确认它是不是跟着市场或产业一起动</h3><p>同业比较只提供横截面证据。走势一致不必然证明共同原因；走势分歧也不必然证明公司单一事件。</p></aside></article></section>
 
-    <section class="block" id="events"><div class="section-title"><span class="number mono">06</span><div><h2>公司事件與時間線</h2><p>盤前、盤中與盤後分開對齊</p></div></div><article class="panel timeline" id="timeline"></article></section>
+    <section class="block" id="events"><div class="section-title"><span class="number mono">06</span><div><h2>公司事件与时间线</h2><p>盘前、盘中与盘后分开对齐</p></div></div><article class="panel timeline" id="timeline"></article></section>
 
-    <section class="block" id="positioning"><div class="section-title"><span class="number mono">07</span><div><h2>資金、籌碼與情緒</h2><p>每項資料都保留 as-of 日期，延遲資料不得倒推歷史因果</p></div></div><div class="split"><article class="panel section-panel"><h3>籌碼與流動性</h3><div class="positioning" id="position-grid"></div></article><article class="panel section-panel"><h3>空頭、選擇權與市場情緒</h3><div class="positioning" id="sentiment-grid"></div></article></div></section>
+    <section class="block" id="positioning"><div class="section-title"><span class="number mono">07</span><div><h2>资金、筹码与情绪</h2><p>每项数据都保留 as-of 日期，延迟数据不得倒推历史因果</p></div></div><div class="split"><article class="panel section-panel"><h3>筹码与流动性</h3><div class="positioning" id="position-grid"></div></article><article class="panel section-panel"><h3>空头、期权与市场情绪</h3><div class="positioning" id="sentiment-grid"></div></article></div></section>
 
-    <section class="block" id="technical"><div class="section-title"><span class="number mono">08</span><div><h2>技術面與量價結構</h2><p>技術指標描述走勢，不用來證明事件因果</p></div></div><div class="technical-head"><article class="panel regime" id="technical-regime"></article><article class="panel technical-grid" id="technical-grid"></article></div><div class="observations" id="technical-observations"></div></section>
+    <section class="block" id="technical"><div class="section-title"><span class="number mono">08</span><div><h2>技术面与量价结构</h2><p>技术指标描述走势，不用来证明事件因果</p></div></div><div class="technical-head"><article class="panel regime" id="technical-regime"></article><article class="panel technical-grid" id="technical-grid"></article></div><div class="observations" id="technical-observations"></div></section>
 
-    <section class="block"><div class="section-title"><span class="number mono">09</span><div><h2>資料警告與來源</h2><p>缺失、延遲與原始連結</p></div></div><article class="panel"><ul class="warnings" id="warnings"></ul><div class="sources" id="sources"></div></article></section>
-    <section class="final"><b>✓</b><div><h2>這是一條可以回頭核查的證據鏈，不是買賣答案。</h2><p>資料、事件與時間點已整理在同一頁；最後是否相信某項推論，仍應回到原始來源自行判斷。本報告不構成投資建議。</p></div></section>
-    <footer class="mono"><span>行情與指標：Yahoo Finance / yfinance</span><span>財報、總經與事件：報告內列示來源</span><span>不構成投資建議</span></footer>
+    <section class="block"><div class="section-title"><span class="number mono">09</span><div><h2>数据警告与来源</h2><p>缺失、延迟与原始连结</p></div></div><article class="panel"><ul class="warnings" id="warnings"></ul><div class="sources" id="sources"></div></article></section>
+    <section class="final"><b>✓</b><div><h2>这是一条可以回头核查的证据链，不是买卖答案。</h2><p>数据、事件与时间点已整理在同一页；最后是否相信某项推论，仍应回到原始来源自行判断。本报告不构成投资建议。</p></div></section>
+    <footer class="mono"><span>行情与指标：Yahoo Finance / yfinance</span><span>财报、宏观与事件：报告内列示来源</span><span>不构成投资建议</span></footer>
   </main>
   <script>
     const report=__REPORT_DATA__;
@@ -60,96 +60,96 @@
     const fmtPct=v=>v==null?"N/A":`${v>0?"+":""}${Number(v).toFixed(2)}%`;
     const fmtNum=v=>v==null?"N/A":Number(v).toLocaleString("en-US",{maximumFractionDigits:2});
     const fmtVol=v=>v==null?"N/A":Math.abs(v)>=1e9?`${(v/1e9).toFixed(2)}B`:Math.abs(v)>=1e6?`${(v/1e6).toFixed(2)}M`:Number(v).toLocaleString();
-    const statusLabel={confirmed:"已確認",inference:"合理推測",unknown:"未找到"};
+    const statusLabel={confirmed:"已确认",inference:"合理推测",unknown:"未找到"};
     const sourceLink=(url,label="原文")=>url?`<a class="source-link mono" href="${esc(url)}" target="_blank" rel="noreferrer">${esc(label)} ↗</a>`:"";
     const empty=text=>`<div class="empty">${esc(text)}</div>`;
     const value=(v,fallback="N/A")=>v==null||v===""?fallback:v;
 
-    document.title=a.headline||`${e.ticker||"Stock"} investigation`;
+    document.title=a.headline||`${e.ticker||"股票"} 异动调查`;
     $('generated').textContent=`GENERATED · ${(e.generated_at||"").slice(0,16).replace("T"," ")} UTC`;
-    $('eyebrow').textContent=`${e.ticker||"—"} / 五層證據調查`;
-    $('headline').textContent=a.headline||`${e.ticker||"股票"} 異動調查`;
-    $('deck').textContent=a.deck||"將市場、產業、公司事件、籌碼情緒與量價結構放進同一條時間線。";
+    $('eyebrow').textContent=`${e.ticker||"—"} / 五层证据调查`;
+    $('headline').textContent=a.headline||`${e.ticker||"股票"} 异动调查`;
+    $('deck').textContent=a.deck||"将市场、产业、公司事件、筹码情绪与量价结构放进同一条时间线。";
     $('investigation-date').textContent=e.investigation_date||"—";
 
     const snap=[
-      ['收盤價',focus.close==null?'N/A':`$${fmtNum(focus.close)}`,focus.date||''],
-      ['單日漲跌',fmtPct(focus.return_1d),'調查觸發日',focus.return_1d>=0?'positive':'negative'],
+      ['收盘价',focus.close==null?'N/A':`$${fmtNum(focus.close)}`,focus.date||''],
+      ['单日涨跌',fmtPct(focus.return_1d),'调查触发日',focus.return_1d>=0?'positive':'negative'],
       ['成交量',fmtVol(focus.volume),`20 日均量 ${fmtVol(focus.average_volume_20)}`],
-      ['RVOL20',focus.rvol20==null?'N/A':`${Number(focus.rvol20).toFixed(2)}x`,'相對前 20 日均量'],
-      ['開盤跳空',fmtPct(focus.gap),'相對前一日收盤',focus.gap>=0?'positive':'negative'],
-      ['五日漲跌',fmtPct(focus.return_5d),'最近五個交易日',focus.return_5d>=0?'positive':'negative']
+      ['RVOL20',focus.rvol20==null?'N/A':`${Number(focus.rvol20).toFixed(2)}x`,'相对前 20 日均量'],
+      ['开盘跳空',fmtPct(focus.gap),'相对前一日收盘',focus.gap>=0?'positive':'negative'],
+      ['五日涨跌',fmtPct(focus.return_5d),'最近五个交易日',focus.return_5d>=0?'positive':'negative']
     ];
     $('snapshots').innerHTML=snap.map(x=>`<article><span>${esc(x[0])}</span><strong class="mono ${x[3]||''}">${esc(x[1])}</strong><small>${esc(x[2])}</small></article>`).join('');
 
     const quarterly=a.quarterly||[];
-    $('financial-panel').innerHTML=quarterly.length?`<div class="table-wrap"><table class="financial-table"><thead><tr><th>季度</th><th>發布時間</th><th>營收實際</th><th>營收預期</th><th>營收 Surprise</th><th>EPS 實際</th><th>EPS 預期</th><th>EPS Surprise</th><th>毛利率</th><th>口徑</th><th>來源</th></tr></thead><tbody>${quarterly.map(q=>`<tr><td><strong class="mono">${esc(q.quarter)}</strong></td><td class="mono">${esc(value(q.reported_at))}</td><td class="metric mono">${esc(value(q.revenue_actual??q.revenue))}</td><td class="mono">${esc(value(q.revenue_estimate))}</td><td class="mono">${esc(value(q.revenue_surprise))}</td><td class="metric mono">${esc(value(q.eps_actual??q.eps))}</td><td class="mono">${esc(value(q.eps_estimate))}</td><td class="mono">${esc(value(q.eps_surprise))}</td><td class="metric mono">${esc(value(q.gross_margin))}</td><td>${esc(value(q.basis))}</td><td>${sourceLink(q.source_url,'財報')}</td></tr>`).join('')}</tbody></table></div><div class="table-note">只有相同會計口徑與單位的實際值和共識才可以計算 Surprise；缺少資料時保留 N/A。</div>`:empty('沒有可靠的季度財報資料。');
+    $('financial-panel').innerHTML=quarterly.length?`<div class="table-wrap"><table class="financial-table"><thead><tr><th>季度</th><th>发布时间</th><th>营收实际</th><th>营收预期</th><th>营收 Surprise</th><th>EPS 实际</th><th>EPS 预期</th><th>EPS Surprise</th><th>毛利率</th><th>口径</th><th>来源</th></tr></thead><tbody>${quarterly.map(q=>`<tr><td><strong class="mono">${esc(q.quarter)}</strong></td><td class="mono">${esc(value(q.reported_at))}</td><td class="metric mono">${esc(value(q.revenue_actual??q.revenue))}</td><td class="mono">${esc(value(q.revenue_estimate))}</td><td class="mono">${esc(value(q.revenue_surprise))}</td><td class="metric mono">${esc(value(q.eps_actual??q.eps))}</td><td class="mono">${esc(value(q.eps_estimate))}</td><td class="mono">${esc(value(q.eps_surprise))}</td><td class="metric mono">${esc(value(q.gross_margin))}</td><td>${esc(value(q.basis))}</td><td>${sourceLink(q.source_url,'财报')}</td></tr>`).join('')}</tbody></table></div><div class="table-note">只有相同会计口径与单位的实际值和共识才可以计算 Surprise；缺少数据时保留 N/A。</div>`:empty('没有可靠的季度财报数据。');
 
     const guidance=a.guidance||[];
-    $('guidance-grid').innerHTML=guidance.length?guidance.map(g=>`<article class="panel data-card"><span class="tag B mono">${esc(value(g.period,'財測'))}</span><h3>${esc(value(g.metric,'公司指引'))}</h3><div class="metric-line"><span>公司範圍</span><strong class="mono">${esc(value(g.company_range))}</strong></div><div class="metric-line"><span>中位數</span><strong class="mono">${esc(value(g.midpoint))}</strong></div><div class="metric-line"><span>市場共識</span><strong class="mono">${esc(value(g.consensus))}</strong></div><div class="metric-line"><span>中位數 vs 共識</span><strong class="mono">${esc(value(g.midpoint_vs_consensus))}</strong></div><p>${esc(value(g.basis,''))}</p>${sourceLink(g.source_url,'查看來源')}</article>`).join(''):empty('沒有可靠的公司財測或同口徑市場共識。');
+    $('guidance-grid').innerHTML=guidance.length?guidance.map(g=>`<article class="panel data-card"><span class="tag B mono">${esc(value(g.period,'业绩指引'))}</span><h3>${esc(value(g.metric,'公司指引'))}</h3><div class="metric-line"><span>公司范围</span><strong class="mono">${esc(value(g.company_range))}</strong></div><div class="metric-line"><span>中位数</span><strong class="mono">${esc(value(g.midpoint))}</strong></div><div class="metric-line"><span>市场共识</span><strong class="mono">${esc(value(g.consensus))}</strong></div><div class="metric-line"><span>中位数 vs 共识</span><strong class="mono">${esc(value(g.midpoint_vs_consensus))}</strong></div><p>${esc(value(g.basis,''))}</p>${sourceLink(g.source_url,'查看来源')}</article>`).join(''):empty('没有可靠的公司业绩指引或同口径市场共识。');
 
     const segments=a.business_segments||[];
-    $('segment-grid').innerHTML=segments.length?segments.map(s=>`<article class="panel data-card"><span class="tag A mono">業務指標</span><h3>${esc(value(s.name))}</h3><div class="metric-line"><span>實際值</span><strong class="mono">${esc(value(s.actual))}</strong></div><div class="metric-line"><span>市場預期</span><strong class="mono">${esc(value(s.estimate))}</strong></div><div class="metric-line"><span>變化</span><strong class="mono">${esc(value(s.change))}</strong></div><p>${esc(value(s.why_it_matters,''))}</p>${sourceLink(s.source_url,'查看來源')}</article>`).join(''):empty('沒有找到對這次異動真正重要的業務分部或營運指標。');
+    $('segment-grid').innerHTML=segments.length?segments.map(s=>`<article class="panel data-card"><span class="tag A mono">业务指标</span><h3>${esc(value(s.name))}</h3><div class="metric-line"><span>实际值</span><strong class="mono">${esc(value(s.actual))}</strong></div><div class="metric-line"><span>市场预期</span><strong class="mono">${esc(value(s.estimate))}</strong></div><div class="metric-line"><span>变化</span><strong class="mono">${esc(value(s.change))}</strong></div><p>${esc(value(s.why_it_matters,''))}</p>${sourceLink(s.source_url,'查看来源')}</article>`).join(''):empty('没有找到对这次异动真正重要的业务分部或运营指标。');
 
     const findings=a.findings||[];
-    $('finding-grid').innerHTML=findings.length?findings.map(f=>`<article class="panel finding ${esc(f.status||'unknown')}"><span class="tag ${esc(f.status||'unknown')} mono">${esc(statusLabel[f.status]||f.status||'未知')}</span><h3>${esc(f.title)}</h3><p>${esc(f.detail)}</p><div class="links">${(f.source_urls||[]).map((u,i)=>sourceLink(u,`來源 ${i+1}`)).join('')}</div></article>`).join(''):`<article class="panel finding unknown"><span class="tag unknown mono">未找到</span><h3>尚未寫入調查結論</h3><p>請依照 Skill 的研究流程完成 analysis.json。</p></article>`;
+    $('finding-grid').innerHTML=findings.length?findings.map(f=>`<article class="panel finding ${esc(f.status||'unknown')}"><span class="tag ${esc(f.status||'unknown')} mono">${esc(statusLabel[f.status]||f.status||'未知')}</span><h3>${esc(f.title)}</h3><p>${esc(f.detail)}</p><div class="links">${(f.source_urls||[]).map((u,i)=>sourceLink(u,`来源 ${i+1}`)).join('')}</div></article>`).join(''):`<article class="panel finding unknown"><span class="tag unknown mono">未找到</span><h3>尚未写入调查结论</h3><p>请依照 Skill 的研究流程完成 analysis.json。</p></article>`;
 
     const proxies=e.macro_proxies||[];
-    $('macro-proxies').innerHTML=proxies.length?proxies.map(x=>`<div class="proxy"><span>${esc(x.label||x.symbol)}</span><strong class="mono">${esc(fmtNum(x.close))}</strong><small class="${x.return_1d>=0?'positive':'negative'}">1D ${esc(fmtPct(x.return_1d))} · 5D ${esc(fmtPct(x.return_5d))}</small><br><br>${sourceLink(x.source_url,x.symbol)}</div>`).join(''):empty('沒有可用的市場總經代理資料。');
+    $('macro-proxies').innerHTML=proxies.length?proxies.map(x=>`<div class="proxy"><span>${esc(x.label||x.symbol)}</span><strong class="mono">${esc(fmtNum(x.close))}</strong><small class="${x.return_1d>=0?'positive':'negative'}">1D ${esc(fmtPct(x.return_1d))} · 5D ${esc(fmtPct(x.return_5d))}</small><br><br>${sourceLink(x.source_url,x.symbol)}</div>`).join(''):empty('没有可用的市场宏观代理数据。');
     const macro=a.macro_context||[];
-    $('macro-context').innerHTML=macro.length?macro.map(x=>`<article><time class="mono">${esc(value(x.occurred_at,'時間未知'))}</time><div><span class="tag ${esc(x.status||'unknown')} mono">${esc(statusLabel[x.status]||x.status||'未知')}</span><h3>${esc(value(x.title))}</h3><p>${esc(value(x.detail))}</p></div>${sourceLink(x.source_url,x.source_name||'來源')}</article>`).join(''):empty('事件窗口內沒有找到能直接解釋異動的總經或政策事件。');
+    $('macro-context').innerHTML=macro.length?macro.map(x=>`<article><time class="mono">${esc(value(x.occurred_at,'时间未知'))}</time><div><span class="tag ${esc(x.status||'unknown')} mono">${esc(statusLabel[x.status]||x.status||'未知')}</span><h3>${esc(value(x.title))}</h3><p>${esc(value(x.detail))}</p></div>${sourceLink(x.source_url,x.source_name||'来源')}</article>`).join(''):empty('事件窗口内没有找到能直接解释异动的宏观或政策事件。');
 
     const comps=e.comparisons||[];
     const maxMove=Math.max(1,...comps.map(x=>Math.abs(Number(x.return_1d)||0)));
     $('peer-date').textContent=e.investigation_date||'';
-    $('peer-list').innerHTML=comps.length?comps.map(x=>{const move=Number(x.return_1d)||0;return `<div class="peer-row"><div class="peer-name"><b class="mono">${esc(x.symbol)}</b><span>${esc(x.role)}</span></div><div class="peer-track"><i class="${move>=0?'up':'down'}" style="width:${Math.max(2,Math.abs(move)/maxMove*92)}%"></i></div><strong class="mono ${move>=0?'positive':'negative'}">${fmtPct(move)}</strong></div>`}).join(''):empty('沒有同業比較資料。');
+    $('peer-list').innerHTML=comps.length?comps.map(x=>{const move=Number(x.return_1d)||0;return `<div class="peer-row"><div class="peer-name"><b class="mono">${esc(x.symbol)}</b><span>${esc(x.role)}</span></div><div class="peer-track"><i class="${move>=0?'up':'down'}" style="width:${Math.max(2,Math.abs(move)/maxMove*92)}%"></i></div><strong class="mono ${move>=0?'positive':'negative'}">${fmtPct(move)}</strong></div>`}).join(''):empty('没有同业比较数据。');
 
-    $('timeline').innerHTML=events.length?[...events].sort((x,y)=>String(x.occurred_at||x.market_date).localeCompare(String(y.occurred_at||y.market_date))).map(ev=>`<article><time class="mono">${esc(ev.occurred_at||ev.market_date)}</time><span class="session mono">${esc(ev.session||'')}</span><div><h3>${esc(ev.title)}</h3><p>${esc(ev.summary)}</p></div><div class="event-source"><span class="tag ${esc(ev.evidence_level||'C')} mono">${esc(ev.evidence_level||'C')}</span><br><br>${sourceLink(ev.source_url,ev.source_name||'原文')}</div></article>`).join(''):empty('沒有找到可對齊的公司事件。');
+    $('timeline').innerHTML=events.length?[...events].sort((x,y)=>String(x.occurred_at||x.market_date).localeCompare(String(y.occurred_at||y.market_date))).map(ev=>`<article><time class="mono">${esc(ev.occurred_at||ev.market_date)}</time><span class="session mono">${esc(ev.session||'')}</span><div><h3>${esc(ev.title)}</h3><p>${esc(ev.summary)}</p></div><div class="event-source"><span class="tag ${esc(ev.evidence_level||'C')} mono">${esc(ev.evidence_level||'C')}</span><br><br>${sourceLink(ev.source_url,ev.source_name||'原文')}</div></article>`).join(''):empty('没有找到可对齐的公司事件。');
 
     const positioning=a.positioning||[];
     const posSnap=e.positioning_snapshot||{};
     const posCards=[];
-    if(Object.keys(posSnap).length){posCards.push(`<article class="panel position-card"><span class="tag ${posSnap.is_contemporaneous_with_investigation?'B':'C'} mono">數據快照</span><h3>空頭與持股結構</h3><div class="metric-line"><span>Short % Float</span><strong class="mono">${esc(posSnap.short_percent_of_float==null?'N/A':fmtPct(posSnap.short_percent_of_float))}</strong></div><div class="metric-line"><span>Days to Cover</span><strong class="mono">${esc(value(posSnap.short_ratio_days))}</strong></div><div class="metric-line"><span>機構持股</span><strong class="mono">${esc(posSnap.institution_held_percent==null?'N/A':fmtPct(posSnap.institution_held_percent))}</strong></div><div class="metric-line"><span>內部人持股</span><strong class="mono">${esc(posSnap.insider_held_percent==null?'N/A':fmtPct(posSnap.insider_held_percent))}</strong></div><small class="asof-note mono">AS OF ${esc(posSnap.short_interest_date||posSnap.as_of||'未知')}</small></article>`)}
-    positioning.forEach(x=>posCards.push(`<article class="panel position-card"><span class="tag ${esc(x.status||'inference')} mono">${esc(statusLabel[x.status]||x.status||'推測')}</span><h3>${esc(x.title)}</h3><p>${esc(x.detail)}</p>${sourceLink(x.source_url,'查看來源')}<small class="asof-note mono">AS OF ${esc(value(x.as_of,'未提供'))}</small></article>`));
-    $('position-grid').innerHTML=posCards.length?posCards.join(''):empty('沒有可靠的籌碼或流動性證據。');
+    if(Object.keys(posSnap).length){posCards.push(`<article class="panel position-card"><span class="tag ${posSnap.is_contemporaneous_with_investigation?'B':'C'} mono">数据快照</span><h3>空头与持股结构</h3><div class="metric-line"><span>Short % Float</span><strong class="mono">${esc(posSnap.short_percent_of_float==null?'N/A':fmtPct(posSnap.short_percent_of_float))}</strong></div><div class="metric-line"><span>Days to Cover</span><strong class="mono">${esc(value(posSnap.short_ratio_days))}</strong></div><div class="metric-line"><span>机构持股</span><strong class="mono">${esc(posSnap.institution_held_percent==null?'N/A':fmtPct(posSnap.institution_held_percent))}</strong></div><div class="metric-line"><span>内部人持股</span><strong class="mono">${esc(posSnap.insider_held_percent==null?'N/A':fmtPct(posSnap.insider_held_percent))}</strong></div><small class="asof-note mono">AS OF ${esc(posSnap.short_interest_date||posSnap.as_of||'未知')}</small></article>`)}
+    positioning.forEach(x=>posCards.push(`<article class="panel position-card"><span class="tag ${esc(x.status||'inference')} mono">${esc(statusLabel[x.status]||x.status||'推测')}</span><h3>${esc(x.title)}</h3><p>${esc(x.detail)}</p>${sourceLink(x.source_url,'查看来源')}<small class="asof-note mono">AS OF ${esc(value(x.as_of,'未提供'))}</small></article>`));
+    $('position-grid').innerHTML=posCards.length?posCards.join(''):empty('没有可靠的筹码或流动性证据。');
 
     const sentiment=a.sentiment||[];
     const option=e.options_snapshot||{};
     const sentimentCards=[];
-    if(Object.keys(option).length){sentimentCards.push(`<article class="panel position-card"><span class="tag ${option.is_contemporaneous_with_investigation?'B':'C'} mono">選擇權快照</span><h3>Put / Call 結構</h3><div class="metric-line"><span>OI Ratio</span><strong class="mono">${esc(value(option.put_call_open_interest_ratio))}</strong></div><div class="metric-line"><span>Volume Ratio</span><strong class="mono">${esc(value(option.put_call_volume_ratio))}</strong></div><div class="metric-line"><span>最近到期日</span><strong class="mono">${esc(value(option.expiration))}</strong></div><small class="asof-note mono">AS OF ${esc(value(option.as_of,'未知'))}</small></article>`)}
-    sentiment.forEach(x=>sentimentCards.push(`<article class="panel position-card"><span class="tag ${esc(x.status||'inference')} mono">${esc(statusLabel[x.status]||x.status||'推測')}</span><h3>${esc(x.metric||x.title)}</h3><div class="metric-line"><span>數值</span><strong class="mono">${esc(value(x.value))}</strong></div><p>${esc(value(x.interpretation||x.detail))}</p>${sourceLink(x.source_url,x.source_name||'查看來源')}<small class="asof-note mono">AS OF ${esc(value(x.as_of,'未提供'))}</small></article>`));
-    $('sentiment-grid').innerHTML=sentimentCards.length?sentimentCards.join(''):empty('沒有可靠的情緒、空頭或選擇權資料。');
+    if(Object.keys(option).length){sentimentCards.push(`<article class="panel position-card"><span class="tag ${option.is_contemporaneous_with_investigation?'B':'C'} mono">期权快照</span><h3>Put / Call 结构</h3><div class="metric-line"><span>OI Ratio</span><strong class="mono">${esc(value(option.put_call_open_interest_ratio))}</strong></div><div class="metric-line"><span>Volume Ratio</span><strong class="mono">${esc(value(option.put_call_volume_ratio))}</strong></div><div class="metric-line"><span>最近到期日</span><strong class="mono">${esc(value(option.expiration))}</strong></div><small class="asof-note mono">AS OF ${esc(value(option.as_of,'未知'))}</small></article>`)}
+    sentiment.forEach(x=>sentimentCards.push(`<article class="panel position-card"><span class="tag ${esc(x.status||'inference')} mono">${esc(statusLabel[x.status]||x.status||'推测')}</span><h3>${esc(x.metric||x.title)}</h3><div class="metric-line"><span>数值</span><strong class="mono">${esc(value(x.value))}</strong></div><p>${esc(value(x.interpretation||x.detail))}</p>${sourceLink(x.source_url,x.source_name||'查看来源')}<small class="asof-note mono">AS OF ${esc(value(x.as_of,'未提供'))}</small></article>`));
+    $('sentiment-grid').innerHTML=sentimentCards.length?sentimentCards.join(''):empty('没有可靠的情绪、空头或期权数据。');
 
     const tech=e.technical||{},techNarrative=a.technical_summary||{},techObs=techNarrative.observations||[];
-    $('technical-regime').innerHTML=`<span class="tag B mono">結構摘要</span><h3>${esc(value(techNarrative.regime,'等待解讀'))}</h3><p>${esc(value(techNarrative.summary,'技術指標已計算，但尚未加入敘事解讀。'))}</p><small class="asof-note mono">AS OF ${esc(value(tech.as_of,'未知'))}</small>`;
+    $('technical-regime').innerHTML=`<span class="tag B mono">结构摘要</span><h3>${esc(value(techNarrative.regime,'等待解读'))}</h3><p>${esc(value(techNarrative.summary,'技术指标已计算，但尚未加入叙事解读。'))}</p><small class="asof-note mono">AS OF ${esc(value(tech.as_of,'未知'))}</small>`;
     const techCards=[
-      ['均線位置',`20D ${fmtNum(tech.sma20)} · 50D ${fmtNum(tech.sma50)} · 200D ${fmtNum(tech.sma200)}`,`距離 20D ${fmtPct(tech.distance_from_sma20_pct)} · 50D ${fmtPct(tech.distance_from_sma50_pct)}`],
-      ['RSI14',fmtNum(tech.rsi14),'描述動能，不代表超買就一定下跌'],
+      ['均线位置',`20D ${fmtNum(tech.sma20)} · 50D ${fmtNum(tech.sma50)} · 200D ${fmtNum(tech.sma200)}`,`距离 20D ${fmtPct(tech.distance_from_sma20_pct)} · 50D ${fmtPct(tech.distance_from_sma50_pct)}`],
+      ['RSI14',fmtNum(tech.rsi14),'描述动能，不代表超买就一定下跌'],
       ['MACD',fmtNum(tech.macd_histogram),`MACD ${fmtNum(tech.macd)} · Signal ${fmtNum(tech.macd_signal)}`],
-      ['ATR14',`${fmtNum(tech.atr14)} / ${fmtPct(tech.atr14_pct)}`,'衡量近期日內波動幅度'],
-      ['近期區間',`20D ${fmtNum(tech.low_20d)}–${fmtNum(tech.high_20d)}`,`52W ${fmtNum(tech.low_52w)}–${fmtNum(tech.high_52w)}`],
-      ['量價結構',`${fmtNum(tech.volume_ma5_vs_ma20)}x`, `5D/20D 均量 · OBV ${esc(value(tech.obv_trend_20))}`]
+      ['ATR14',`${fmtNum(tech.atr14)} / ${fmtPct(tech.atr14_pct)}`,'衡量近期日内波动幅度'],
+      ['近期区间',`20D ${fmtNum(tech.low_20d)}–${fmtNum(tech.high_20d)}`,`52W ${fmtNum(tech.low_52w)}–${fmtNum(tech.high_52w)}`],
+      ['量价结构',`${fmtNum(tech.volume_ma5_vs_ma20)}x`, `5D/20D 均量 · OBV ${esc(value(tech.obv_trend_20))}`]
     ];
     $('technical-grid').innerHTML=techCards.map(x=>`<article><span>${esc(x[0])}</span><strong class="mono">${esc(x[1])}</strong><small>${esc(x[2])}</small></article>`).join('');
-    $('technical-observations').innerHTML=techObs.length?techObs.map(x=>`<article class="panel observation"><span class="tag B mono">${esc(value(x.label,'觀察'))}</span><strong class="mono">${esc(value(x.value))}</strong><p>${esc(value(x.interpretation))}</p></article>`).join(''):empty('沒有額外的技術面解讀；上方數值仍可直接核查。');
+    $('technical-observations').innerHTML=techObs.length?techObs.map(x=>`<article class="panel observation"><span class="tag B mono">${esc(value(x.label,'观察'))}</span><strong class="mono">${esc(value(x.value))}</strong><p>${esc(value(x.interpretation))}</p></article>`).join(''):empty('没有额外的技术面解读；上方数值仍可直接核查。');
 
     const warnings=[...(e.warnings||[]),...(a.warnings||[])];
-    $('warnings').innerHTML=warnings.length?warnings.map(w=>`<li>${esc(w)}</li>`):'<li>沒有額外資料警告。</li>';
+    $('warnings').innerHTML=warnings.length?warnings.map(w=>`<li>${esc(w)}</li>`):'<li>没有额外数据警告。</li>';
     const sourceItems=[],seen=new Set();
     const addSource=(url,label)=>{if(url&&!seen.has(url)){seen.add(url);sourceItems.push({url,label})}};
-    quarterly.forEach(q=>addSource(q.source_url,`${q.quarter||'財報'} · 公司原文`));
-    guidance.forEach(g=>addSource(g.source_url,`${g.period||'財測'} · ${g.metric||''}`));
-    segments.forEach(s=>addSource(s.source_url,`業務指標 · ${s.name||''}`));
-    macro.forEach(x=>addSource(x.source_url,`總經 · ${x.title||''}`));
-    events.forEach(ev=>addSource(ev.source_url,`${ev.source_name||'事件來源'} · ${ev.title||''}`));
-    findings.forEach(f=>(f.source_urls||[]).forEach((u,i)=>addSource(u,`${f.title||'調查結論'} · 來源 ${i+1}`)));
-    positioning.forEach(x=>addSource(x.source_url,`籌碼 · ${x.title||''}`));
-    sentiment.forEach(x=>addSource(x.source_url,`情緒 · ${x.metric||x.title||''}`));
-    $('sources').innerHTML=sourceItems.length?sourceItems.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noreferrer"><span>${esc(s.label)}</span><b>↗</b></a>`).join(''):empty('沒有可用來源連結。');
+    quarterly.forEach(q=>addSource(q.source_url,`${q.quarter||'财报'} · 公司原文`));
+    guidance.forEach(g=>addSource(g.source_url,`${g.period||'业绩指引'} · ${g.metric||''}`));
+    segments.forEach(s=>addSource(s.source_url,`业务指标 · ${s.name||''}`));
+    macro.forEach(x=>addSource(x.source_url,`宏观 · ${x.title||''}`));
+    events.forEach(ev=>addSource(ev.source_url,`${ev.source_name||'事件来源'} · ${ev.title||''}`));
+    findings.forEach(f=>(f.source_urls||[]).forEach((u,i)=>addSource(u,`${f.title||'调查结论'} · 来源 ${i+1}`)));
+    positioning.forEach(x=>addSource(x.source_url,`筹码 · ${x.title||''}`));
+    sentiment.forEach(x=>addSource(x.source_url,`情绪 · ${x.metric||x.title||''}`));
+    $('sources').innerHTML=sourceItems.length?sourceItems.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noreferrer"><span>${esc(s.label)}</span><b>↗</b></a>`).join(''):empty('没有可用来源连结。');
 
     function timeKey(t){if(!t)return null;if(typeof t==='string')return t;if(typeof t==='number')return new Date(t*1000).toISOString().slice(0,10);return `${t.year}-${String(t.month).padStart(2,'0')}-${String(t.day).padStart(2,'0')}`}
     function showReadout(row){if(!row)return;$('readout').innerHTML=`<strong>${esc(row.date)}</strong><span>O <b>${fmtNum(row.open)}</b></span><span>H <b>${fmtNum(row.high)}</b></span><span>L <b>${fmtNum(row.low)}</b></span><span>C <b>${fmtNum(row.close)}</b></span><span>VOL <b>${fmtVol(row.volume)}</b></span><span>RVOL <b>${row.rvol==null?'N/A':Number(row.rvol).toFixed(2)+'x'}</b></span><span>SMA20 <b>${fmtNum(row.sma20)}</b></span><span>SMA50 <b>${fmtNum(row.sma50)}</b></span><em class="${row.return>=0?'positive':'negative'}">${fmtPct(row.return)}</em>`}
-    function showEvents(date){const list=events.filter(ev=>ev.market_date===date);$('event-detail').innerHTML=list.length?list.map(ev=>`<article><span class="tag ${esc(ev.evidence_level||'C')} mono">${esc(ev.type||'事件')}</span><div><b>${esc(ev.market_date)} · ${esc(ev.title)}</b><p>${esc(ev.summary)}</p></div>${sourceLink(ev.source_url,ev.source_name||'查看原文')}</article>`).join(''):`<p class="event-placeholder">把游標移到財報或重大事件所在日期，這裡會顯示摘要與原始連結。</p>`}
+    function showEvents(date){const list=events.filter(ev=>ev.market_date===date);$('event-detail').innerHTML=list.length?list.map(ev=>`<article><span class="tag ${esc(ev.evidence_level||'C')} mono">${esc(ev.type||'事件')}</span><div><b>${esc(ev.market_date)} · ${esc(ev.title)}</b><p>${esc(ev.summary)}</p></div>${sourceLink(ev.source_url,ev.source_name||'查看原文')}</article>`).join(''):`<p class="event-placeholder">把游标移到财报或重大事件所在日期，这里会显示摘要与原始连结。</p>`}
     showReadout(bars.find(x=>x.date===e.investigation_date)||bars.at(-1));showEvents(e.investigation_date);
 
     if(window.LightweightCharts&&bars.length){
@@ -168,7 +168,7 @@
       const rows=new Map(bars.map(x=>[x.date,x]));chart.subscribeCrosshairMove(p=>{const key=timeKey(p.time);if(key&&rows.has(key)){showReadout(rows.get(key));showEvents(key)}});
       function setPeriod(size,button){$('periods').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===button));const from=Math.max(0,bars.length-size);chart.timeScale().setVisibleLogicalRange({from,to:bars.length+2})}
       $('periods').querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>setPeriod(Number(btn.dataset.size),btn)));setPeriod(66,$('periods').querySelector('.active'));
-    }else{$('chart').innerHTML=empty('圖表程式未能載入。請確認網路連線後重新開啟。')}
+    }else{$('chart').innerHTML=empty('图表程式未能载入。请确认网路连线后重新开启。')}
   </script>
 </body>
 </html>

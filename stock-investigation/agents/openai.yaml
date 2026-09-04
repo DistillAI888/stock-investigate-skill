@@ -1,4 +1,4 @@
 interface:
-  display_name: "Stock Investigation"
-  short_description: "Investigate a stock move across five evidence layers"
-  default_prompt: "Use $stock-investigation to investigate this ticker and date across macro, industry, company, positioning, sentiment, and technical evidence, then generate the sourced interactive HTML report."
+  display_name: "美股异动调查"
+  short_description: "从五层证据调查美股异动原因"
+  default_prompt: "使用 $stock-investigation，从宏观、行业、公司、资金情绪和技术面五层证据调查这只股票在指定日期的异动，并默认生成带来源的简体中文交互式 HTML 报告。"
