@@ -14,9 +14,9 @@ import yfinance as yf
 
 
 MACRO_LABELS = {
-    "^VIX": "VIX volatility index",
-    "TLT": "Long-duration US Treasury ETF",
-    "UUP": "US dollar index ETF",
+    "^VIX": "VIX 波动率指数",
+    "TLT": "长期美国国债 ETF",
+    "UUP": "美元指数 ETF",
 }
 
 
@@ -452,8 +452,8 @@ def main() -> None:
     options, options_warnings = options_snapshot(ticker, focus_date)
     warnings.extend(
         [
-            "Yahoo Finance / yfinance is an unofficial research source; verify material claims against primary sources.",
-            "News near a price move is context, not proof of causation.",
+            "Yahoo Finance / yfinance 属于非官方研究数据源；重要结论应通过一手来源复核。",
+            "股价异动附近出现的新闻只能作为背景，不能单独证明因果关系。",
             *news_warnings,
             *filing_warnings,
             *positioning_warnings,

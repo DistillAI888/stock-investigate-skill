@@ -48,7 +48,7 @@
 
     <section class="block" id="technical"><div class="section-title"><span class="number mono">08</span><div><h2>技术面与量价结构</h2><p>技术指标描述走势，不用来证明事件因果</p></div></div><div class="technical-head"><article class="panel regime" id="technical-regime"></article><article class="panel technical-grid" id="technical-grid"></article></div><div class="observations" id="technical-observations"></div></section>
 
-    <section class="block"><div class="section-title"><span class="number mono">09</span><div><h2>数据警告与来源</h2><p>缺失、延迟与原始连结</p></div></div><article class="panel"><ul class="warnings" id="warnings"></ul><div class="sources" id="sources"></div></article></section>
+    <section class="block"><div class="section-title"><span class="number mono">09</span><div><h2>数据警告与来源</h2><p>缺失、延迟与原始链接</p></div></div><article class="panel"><ul class="warnings" id="warnings"></ul><div class="sources" id="sources"></div></article></section>
     <section class="final"><b>✓</b><div><h2>这是一条可以回头核查的证据链，不是买卖答案。</h2><p>数据、事件与时间点已整理在同一页；最后是否相信某项推论，仍应回到原始来源自行判断。本报告不构成投资建议。</p></div></section>
     <footer class="mono"><span>行情与指标：Yahoo Finance / yfinance</span><span>财报、宏观与事件：报告内列示来源</span><span>不构成投资建议</span></footer>
   </main>
@@ -66,7 +66,7 @@
     const value=(v,fallback="N/A")=>v==null||v===""?fallback:v;
 
     document.title=a.headline||`${e.ticker||"股票"} 异动调查`;
-    $('generated').textContent=`GENERATED · ${(e.generated_at||"").slice(0,16).replace("T"," ")} UTC`;
+    $('generated').textContent=`生成时间 · ${(e.generated_at||"").slice(0,16).replace("T"," ")} UTC`;
     $('eyebrow').textContent=`${e.ticker||"—"} / 五层证据调查`;
     $('headline').textContent=a.headline||`${e.ticker||"股票"} 异动调查`;
     $('deck').textContent=a.deck||"将市场、产业、公司事件、筹码情绪与量价结构放进同一条时间线。";
@@ -102,33 +102,35 @@
     const comps=e.comparisons||[];
     const maxMove=Math.max(1,...comps.map(x=>Math.abs(Number(x.return_1d)||0)));
     $('peer-date').textContent=e.investigation_date||'';
-    $('peer-list').innerHTML=comps.length?comps.map(x=>{const move=Number(x.return_1d)||0;return `<div class="peer-row"><div class="peer-name"><b class="mono">${esc(x.symbol)}</b><span>${esc(x.role)}</span></div><div class="peer-track"><i class="${move>=0?'up':'down'}" style="width:${Math.max(2,Math.abs(move)/maxMove*92)}%"></i></div><strong class="mono ${move>=0?'positive':'negative'}">${fmtPct(move)}</strong></div>`}).join(''):empty('没有同业比较数据。');
+    const roleLabel={stock:'调查对象',benchmark:'市场基准',sector:'行业基准',peer:'同业'};
+    $('peer-list').innerHTML=comps.length?comps.map(x=>{const move=Number(x.return_1d)||0;return `<div class="peer-row"><div class="peer-name"><b class="mono">${esc(x.symbol)}</b><span>${esc(roleLabel[x.role]||x.role)}</span></div><div class="peer-track"><i class="${move>=0?'up':'down'}" style="width:${Math.max(2,Math.abs(move)/maxMove*92)}%"></i></div><strong class="mono ${move>=0?'positive':'negative'}">${fmtPct(move)}</strong></div>`}).join(''):empty('没有同业比较数据。');
 
-    $('timeline').innerHTML=events.length?[...events].sort((x,y)=>String(x.occurred_at||x.market_date).localeCompare(String(y.occurred_at||y.market_date))).map(ev=>`<article><time class="mono">${esc(ev.occurred_at||ev.market_date)}</time><span class="session mono">${esc(ev.session||'')}</span><div><h3>${esc(ev.title)}</h3><p>${esc(ev.summary)}</p></div><div class="event-source"><span class="tag ${esc(ev.evidence_level||'C')} mono">${esc(ev.evidence_level||'C')}</span><br><br>${sourceLink(ev.source_url,ev.source_name||'原文')}</div></article>`).join(''):empty('没有找到可对齐的公司事件。');
+    const sessionLabel={'pre-market':'盘前',regular:'常规时段','after-hours':'盘后','non-trading-day':'非交易日'};
+    $('timeline').innerHTML=events.length?[...events].sort((x,y)=>String(x.occurred_at||x.market_date).localeCompare(String(y.occurred_at||y.market_date))).map(ev=>`<article><time class="mono">${esc(ev.occurred_at||ev.market_date)}</time><span class="session mono">${esc(sessionLabel[ev.session]||ev.session||'')}</span><div><h3>${esc(ev.title)}</h3><p>${esc(ev.summary)}</p></div><div class="event-source"><span class="tag ${esc(ev.evidence_level||'C')} mono">${esc(ev.evidence_level||'C')}</span><br><br>${sourceLink(ev.source_url,ev.source_name||'原文')}</div></article>`).join(''):empty('没有找到可对齐的公司事件。');
 
     const positioning=a.positioning||[];
     const posSnap=e.positioning_snapshot||{};
     const posCards=[];
-    if(Object.keys(posSnap).length){posCards.push(`<article class="panel position-card"><span class="tag ${posSnap.is_contemporaneous_with_investigation?'B':'C'} mono">数据快照</span><h3>空头与持股结构</h3><div class="metric-line"><span>Short % Float</span><strong class="mono">${esc(posSnap.short_percent_of_float==null?'N/A':fmtPct(posSnap.short_percent_of_float))}</strong></div><div class="metric-line"><span>Days to Cover</span><strong class="mono">${esc(value(posSnap.short_ratio_days))}</strong></div><div class="metric-line"><span>机构持股</span><strong class="mono">${esc(posSnap.institution_held_percent==null?'N/A':fmtPct(posSnap.institution_held_percent))}</strong></div><div class="metric-line"><span>内部人持股</span><strong class="mono">${esc(posSnap.insider_held_percent==null?'N/A':fmtPct(posSnap.insider_held_percent))}</strong></div><small class="asof-note mono">AS OF ${esc(posSnap.short_interest_date||posSnap.as_of||'未知')}</small></article>`)}
-    positioning.forEach(x=>posCards.push(`<article class="panel position-card"><span class="tag ${esc(x.status||'inference')} mono">${esc(statusLabel[x.status]||x.status||'推测')}</span><h3>${esc(x.title)}</h3><p>${esc(x.detail)}</p>${sourceLink(x.source_url,'查看来源')}<small class="asof-note mono">AS OF ${esc(value(x.as_of,'未提供'))}</small></article>`));
+    if(Object.keys(posSnap).length){posCards.push(`<article class="panel position-card"><span class="tag ${posSnap.is_contemporaneous_with_investigation?'B':'C'} mono">数据快照</span><h3>空头与持股结构</h3><div class="metric-line"><span>空头占流通股</span><strong class="mono">${esc(posSnap.short_percent_of_float==null?'N/A':fmtPct(posSnap.short_percent_of_float))}</strong></div><div class="metric-line"><span>回补天数</span><strong class="mono">${esc(value(posSnap.short_ratio_days))}</strong></div><div class="metric-line"><span>机构持股</span><strong class="mono">${esc(posSnap.institution_held_percent==null?'N/A':fmtPct(posSnap.institution_held_percent))}</strong></div><div class="metric-line"><span>内部人持股</span><strong class="mono">${esc(posSnap.insider_held_percent==null?'N/A':fmtPct(posSnap.insider_held_percent))}</strong></div><small class="asof-note mono">截至 ${esc(posSnap.short_interest_date||posSnap.as_of||'未知')}</small></article>`)}
+    positioning.forEach(x=>posCards.push(`<article class="panel position-card"><span class="tag ${esc(x.status||'inference')} mono">${esc(statusLabel[x.status]||x.status||'推测')}</span><h3>${esc(x.title)}</h3><p>${esc(x.detail)}</p>${sourceLink(x.source_url,'查看来源')}<small class="asof-note mono">截至 ${esc(value(x.as_of,'未提供'))}</small></article>`));
     $('position-grid').innerHTML=posCards.length?posCards.join(''):empty('没有可靠的筹码或流动性证据。');
 
     const sentiment=a.sentiment||[];
     const option=e.options_snapshot||{};
     const sentimentCards=[];
-    if(Object.keys(option).length){sentimentCards.push(`<article class="panel position-card"><span class="tag ${option.is_contemporaneous_with_investigation?'B':'C'} mono">期权快照</span><h3>Put / Call 结构</h3><div class="metric-line"><span>OI Ratio</span><strong class="mono">${esc(value(option.put_call_open_interest_ratio))}</strong></div><div class="metric-line"><span>Volume Ratio</span><strong class="mono">${esc(value(option.put_call_volume_ratio))}</strong></div><div class="metric-line"><span>最近到期日</span><strong class="mono">${esc(value(option.expiration))}</strong></div><small class="asof-note mono">AS OF ${esc(value(option.as_of,'未知'))}</small></article>`)}
-    sentiment.forEach(x=>sentimentCards.push(`<article class="panel position-card"><span class="tag ${esc(x.status||'inference')} mono">${esc(statusLabel[x.status]||x.status||'推测')}</span><h3>${esc(x.metric||x.title)}</h3><div class="metric-line"><span>数值</span><strong class="mono">${esc(value(x.value))}</strong></div><p>${esc(value(x.interpretation||x.detail))}</p>${sourceLink(x.source_url,x.source_name||'查看来源')}<small class="asof-note mono">AS OF ${esc(value(x.as_of,'未提供'))}</small></article>`));
+    if(Object.keys(option).length){sentimentCards.push(`<article class="panel position-card"><span class="tag ${option.is_contemporaneous_with_investigation?'B':'C'} mono">期权快照</span><h3>看跌 / 看涨结构</h3><div class="metric-line"><span>未平仓量比</span><strong class="mono">${esc(value(option.put_call_open_interest_ratio))}</strong></div><div class="metric-line"><span>成交量比</span><strong class="mono">${esc(value(option.put_call_volume_ratio))}</strong></div><div class="metric-line"><span>最近到期日</span><strong class="mono">${esc(value(option.expiration))}</strong></div><small class="asof-note mono">截至 ${esc(value(option.as_of,'未知'))}</small></article>`)}
+    sentiment.forEach(x=>sentimentCards.push(`<article class="panel position-card"><span class="tag ${esc(x.status||'inference')} mono">${esc(statusLabel[x.status]||x.status||'推测')}</span><h3>${esc(x.metric||x.title)}</h3><div class="metric-line"><span>数值</span><strong class="mono">${esc(value(x.value))}</strong></div><p>${esc(value(x.interpretation||x.detail))}</p>${sourceLink(x.source_url,x.source_name||'查看来源')}<small class="asof-note mono">截至 ${esc(value(x.as_of,'未提供'))}</small></article>`));
     $('sentiment-grid').innerHTML=sentimentCards.length?sentimentCards.join(''):empty('没有可靠的情绪、空头或期权数据。');
 
     const tech=e.technical||{},techNarrative=a.technical_summary||{},techObs=techNarrative.observations||[];
-    $('technical-regime').innerHTML=`<span class="tag B mono">结构摘要</span><h3>${esc(value(techNarrative.regime,'等待解读'))}</h3><p>${esc(value(techNarrative.summary,'技术指标已计算，但尚未加入叙事解读。'))}</p><small class="asof-note mono">AS OF ${esc(value(tech.as_of,'未知'))}</small>`;
+    $('technical-regime').innerHTML=`<span class="tag B mono">结构摘要</span><h3>${esc(value(techNarrative.regime,'等待解读'))}</h3><p>${esc(value(techNarrative.summary,'技术指标已计算，但尚未加入叙事解读。'))}</p><small class="asof-note mono">截至 ${esc(value(tech.as_of,'未知'))}</small>`;
     const techCards=[
       ['均线位置',`20D ${fmtNum(tech.sma20)} · 50D ${fmtNum(tech.sma50)} · 200D ${fmtNum(tech.sma200)}`,`距离 20D ${fmtPct(tech.distance_from_sma20_pct)} · 50D ${fmtPct(tech.distance_from_sma50_pct)}`],
       ['RSI14',fmtNum(tech.rsi14),'描述动能，不代表超买就一定下跌'],
       ['MACD',fmtNum(tech.macd_histogram),`MACD ${fmtNum(tech.macd)} · Signal ${fmtNum(tech.macd_signal)}`],
       ['ATR14',`${fmtNum(tech.atr14)} / ${fmtPct(tech.atr14_pct)}`,'衡量近期日内波动幅度'],
       ['近期区间',`20D ${fmtNum(tech.low_20d)}–${fmtNum(tech.high_20d)}`,`52W ${fmtNum(tech.low_52w)}–${fmtNum(tech.high_52w)}`],
-      ['量价结构',`${fmtNum(tech.volume_ma5_vs_ma20)}x`, `5D/20D 均量 · OBV ${esc(value(tech.obv_trend_20))}`]
+      ['量价结构',`${fmtNum(tech.volume_ma5_vs_ma20)}x`, `5D/20D 均量 · OBV ${{rising:'上升',falling:'下降',flat_or_unavailable:'持平或不可用'}[tech.obv_trend_20]||esc(value(tech.obv_trend_20))}`]
     ];
     $('technical-grid').innerHTML=techCards.map(x=>`<article><span>${esc(x[0])}</span><strong class="mono">${esc(x[1])}</strong><small>${esc(x[2])}</small></article>`).join('');
     $('technical-observations').innerHTML=techObs.length?techObs.map(x=>`<article class="panel observation"><span class="tag B mono">${esc(value(x.label,'观察'))}</span><strong class="mono">${esc(value(x.value))}</strong><p>${esc(value(x.interpretation))}</p></article>`).join(''):empty('没有额外的技术面解读；上方数值仍可直接核查。');
@@ -145,11 +147,12 @@
     findings.forEach(f=>(f.source_urls||[]).forEach((u,i)=>addSource(u,`${f.title||'调查结论'} · 来源 ${i+1}`)));
     positioning.forEach(x=>addSource(x.source_url,`筹码 · ${x.title||''}`));
     sentiment.forEach(x=>addSource(x.source_url,`情绪 · ${x.metric||x.title||''}`));
-    $('sources').innerHTML=sourceItems.length?sourceItems.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noreferrer"><span>${esc(s.label)}</span><b>↗</b></a>`).join(''):empty('没有可用来源连结。');
+    $('sources').innerHTML=sourceItems.length?sourceItems.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noreferrer"><span>${esc(s.label)}</span><b>↗</b></a>`).join(''):empty('没有可用来源链接。');
 
     function timeKey(t){if(!t)return null;if(typeof t==='string')return t;if(typeof t==='number')return new Date(t*1000).toISOString().slice(0,10);return `${t.year}-${String(t.month).padStart(2,'0')}-${String(t.day).padStart(2,'0')}`}
     function showReadout(row){if(!row)return;$('readout').innerHTML=`<strong>${esc(row.date)}</strong><span>O <b>${fmtNum(row.open)}</b></span><span>H <b>${fmtNum(row.high)}</b></span><span>L <b>${fmtNum(row.low)}</b></span><span>C <b>${fmtNum(row.close)}</b></span><span>VOL <b>${fmtVol(row.volume)}</b></span><span>RVOL <b>${row.rvol==null?'N/A':Number(row.rvol).toFixed(2)+'x'}</b></span><span>SMA20 <b>${fmtNum(row.sma20)}</b></span><span>SMA50 <b>${fmtNum(row.sma50)}</b></span><em class="${row.return>=0?'positive':'negative'}">${fmtPct(row.return)}</em>`}
-    function showEvents(date){const list=events.filter(ev=>ev.market_date===date);$('event-detail').innerHTML=list.length?list.map(ev=>`<article><span class="tag ${esc(ev.evidence_level||'C')} mono">${esc(ev.type||'事件')}</span><div><b>${esc(ev.market_date)} · ${esc(ev.title)}</b><p>${esc(ev.summary)}</p></div>${sourceLink(ev.source_url,ev.source_name||'查看原文')}</article>`).join(''):`<p class="event-placeholder">把游标移到财报或重大事件所在日期，这里会显示摘要与原始连结。</p>`}
+    const eventTypeLabel={macro:'宏观',news:'新闻',analyst:'分析师',earnings:'财报',filing:'公告',company:'公司'};
+    function showEvents(date){const list=events.filter(ev=>ev.market_date===date);$('event-detail').innerHTML=list.length?list.map(ev=>`<article><span class="tag ${esc(ev.evidence_level||'C')} mono">${esc(eventTypeLabel[ev.type]||ev.type||'事件')}</span><div><b>${esc(ev.market_date)} · ${esc(ev.title)}</b><p>${esc(ev.summary)}</p></div>${sourceLink(ev.source_url,ev.source_name||'查看原文')}</article>`).join(''):`<p class="event-placeholder">把游标移到财报或重大事件所在日期，这里会显示摘要与原始链接。</p>`}
     showReadout(bars.find(x=>x.date===e.investigation_date)||bars.at(-1));showEvents(e.investigation_date);
 
     if(window.LightweightCharts&&bars.length){
